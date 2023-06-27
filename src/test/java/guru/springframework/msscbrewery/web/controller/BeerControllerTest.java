@@ -83,4 +83,16 @@ class BeerControllerTest {
         };
         testRequestBody(MockMvcRequestBuilders.put("/api/v1/beer/" + uuid), MockMvcResultMatchers.status().isNoContent(), consumer);
     }
+
+    @Test
+    @DisplayName("shoud delete a beer")
+    void shouldDeleteABeer() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/beer/"+ uuid))
+                        .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+
+        verify(beerService).delete(ArgumentMatchers.eq(uuid));
+    }
 }
