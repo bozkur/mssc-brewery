@@ -2,7 +2,6 @@ package guru.springframework.msscbrewery.web.controller.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.msscbrewery.services.v2.BeerServiceV2;
-import guru.springframework.msscbrewery.web.controller.BeerController;
 import guru.springframework.msscbrewery.web.model.v2.BeerDtoV2;
 import guru.springframework.msscbrewery.web.model.v2.BeerStyle;
 import org.hamcrest.MatcherAssert;
@@ -33,6 +32,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(BeerControllerV2.class)
 class BeerControllerV2Test {
+    public static final String URL_PATH = "/api/v2/beer";
     @MockBean
     private BeerServiceV2 beerService;
     @Autowired
@@ -52,6 +52,7 @@ class BeerControllerV2Test {
     }
 
     @Test
+
     @DisplayName("should insert a beer")
     void shouldPostABeer() throws Exception {
         BiConsumer<ArgumentCaptor<BeerDtoV2>, BeerDtoV2> consumer = (savedBeerCaptor, expectedBeer) -> {
@@ -59,7 +60,7 @@ class BeerControllerV2Test {
             BDDMockito.given(save).willReturn(expectedBeer);*/
             when(beerService.save(savedBeerCaptor.capture())).thenReturn(expectedBeer);
         };
-        testRequestBody(MockMvcRequestBuilders.post("/api/v2/beer"),
+        testRequestBody(MockMvcRequestBuilders.post(URL_PATH),
                 MockMvcResultMatchers.status().isCreated(), consumer);
     }
 
@@ -81,9 +82,7 @@ class BeerControllerV2Test {
     @DisplayName("should update a beer")
     void shouldPutABeer() throws Exception {
         UUID uuid = UUID.randomUUID();
-        BiConsumer<ArgumentCaptor<BeerDtoV2>, BeerDtoV2> consumer = (savedBeerCaptor, expectedBeer) -> {
-            doNothing().when(beerService).update(ArgumentMatchers.eq(uuid), savedBeerCaptor.capture());
-        };
+        BiConsumer<ArgumentCaptor<BeerDtoV2>, BeerDtoV2> consumer = (savedBeerCaptor, expectedBeer) -> doNothing().when(beerService).update(ArgumentMatchers.eq(uuid), savedBeerCaptor.capture());
         testRequestBody(MockMvcRequestBuilders.put("/api/v2/beer/" + uuid), MockMvcResultMatchers.status().isNoContent(), consumer);
     }
 
@@ -97,5 +96,17 @@ class BeerControllerV2Test {
 
 
         verify(beerService).delete(ArgumentMatchers.eq(uuid));
+    }
+
+    @Test
+    @DisplayName("Return an error when newly created beer is not valid")
+    void shouldReturnErrorWhenCreatedBeerIsNotValid() throws Exception {
+        BeerDtoV2 invalid = BeerDtoV2.builder().beerName("").beerStyle(BeerStyle.LAGER)
+                .id(UUID.randomUUID()).build();
+        mockMvc.perform(MockMvcRequestBuilders.post(URL_PATH)
+                        .contentType(MediaType.APPLICATION_JSON).content(new ObjectMapper().writeValueAsString(invalid)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()", Matchers.equalTo(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0]", Matchers.equalTo("beerName:NotBlank")));
     }
 }
