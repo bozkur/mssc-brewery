@@ -7,12 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequestMapping("/api/v2/beer")
 @RestController
@@ -49,13 +46,5 @@ public class BeerControllerV2 {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void handleDelete(@PathVariable UUID beerId) {
         beerService.delete(beerId);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<List<String>> validationErrorHandler(MethodArgumentNotValidException ex) {
-
-        List<String> body = ex.getFieldErrors().stream()
-                .map(fe -> fe.getField() + ":" + fe.getCode()).collect(Collectors.toList());
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 }

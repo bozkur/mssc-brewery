@@ -107,6 +107,8 @@ class BeerControllerV2Test {
                         .contentType(MediaType.APPLICATION_JSON).content(new ObjectMapper().writeValueAsString(invalid)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.size()", Matchers.equalTo(1)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0]", Matchers.equalTo("beerName:NotBlank")));
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].fieldName", Matchers.equalTo("beerName")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].errorCode", Matchers.equalTo("NotBlank")));
+
     }
 }
