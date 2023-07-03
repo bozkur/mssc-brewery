@@ -3,6 +3,7 @@ package guru.springframework.msscbrewery.domain;
 import guru.springframework.msscbrewery.web.model.v2.BeerStyle;
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Data
@@ -15,4 +16,7 @@ public class Beer {
     private String beerName;
     private BeerStyle beerStyle;
     private Long upc;
+
+    private Timestamp createdDate;
+    private Timestamp lastUpdateDate;
 }
